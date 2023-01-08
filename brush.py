@@ -1,4 +1,3 @@
-import curses
 import enum
 import os
 import sys
@@ -395,7 +394,6 @@ def find_biggest_rectangle_to_paint_bottom_left(
         and set(matrix.get_points_in_selection(brush.current_position(), Point(x, y + 1)))
         - brush.painted
         and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x, y + 1))
-
     ):
         y += 1
     return Point(x, y)
@@ -425,77 +423,7 @@ def find_biggest_rectangle_to_paint_top_left(
     return Point(x, y)
 
 
-# def find_biggest_rectangle_to_paint_in_direction(
-#     matrix: Matrix,
-#     brush: Brush,
-#     direction_x: RectangleDirectionX,
-#     direction_y: RectangleDirectionY,
-# ) -> Point:
-#     """
-#     finds the biggest paintable rectangle in a specific direction
-#     """
-#     x = brush.x
-#     y = brush.y
-#
-#     def x_direction_check(x_, y_) -> bool:
-#         if direction_x == RectangleDirectionX.RIGHT:
-#             next_point = Point(x + 1, y_)
-#             return (
-#                 x_ < len(matrix.data[0]) - 1
-#                 and matrix.data[y_][x + 1] != 0
-#                 and set(matrix.get_points_in_selection(brush.current_position(), next_point))
-#                 - brush.painted
-#                 and 0 not in matrix.get_values_in_selection(brush.current_position(), next_point)
-#             )
-#         else:
-#             next_point = Point(x_ - 1, y_)
-#             return (
-#                 x_ > 0
-#                 and matrix.data[y_][x_ - 1] != 0
-#                 and set(matrix.get_points_in_selection(brush.current_position(), next_point))
-#                 - brush.painted
-#                 and 0 not in matrix.get_values_in_selection(brush.current_position(), next_point)
-#             )
-#
-#     def y_direction_check(x_, y_) -> bool:
-#         if direction_y == RectangleDirectionY.DOWN:
-#             next_point = Point(x_, y_ + 1)
-#             return (
-#                 y_ < len(matrix.data) - 1
-#                 and matrix.data[y_ + 1][x_] != 0
-#                 and set(matrix.get_points_in_selection(brush.current_position(), next_point))
-#                 - brush.painted
-#                 and 0 not in matrix.get_values_in_selection(brush.current_position(), next_point)
-#             )
-#         else:
-#             next_point = Point(x_, y_ - 1)
-#             return (
-#                 y_ > 0
-#                 and matrix.data[y_ - 1][x_] != 0
-#                 and set(matrix.get_points_in_selection(brush.current_position(), next_point))
-#                 - brush.painted
-#                 and 0 not in matrix.get_values_in_selection(brush.current_position(), next_point)
-#             )
-#
-#     try:
-#         while x_direction_check(x, y):
-#             if direction_x == RectangleDirectionX.RIGHT:
-#                 x += 1
-#             else:
-#                 x -= 1
-#         while y_direction_check(x, y):
-#             if direction_y == RectangleDirectionY.DOWN:
-#                 y += 1
-#             else:
-#                 y -= 1
-#     except IndexError:
-#         raise IndexError(
-#             f"IndexError: x: {x}, y: {y}, direction_x: {direction_x}, direction_y: {direction_y}"
-#         )
-#     return Point(x, y)
-
-
-def generate_commands(brush: Brush, matrix: Matrix, debug: bool) -> None:
+def generate_commands(brush: Brush, matrix: Matrix, verbose: bool) -> None:
     if brush.current_position() in brush.painted:
         closest_point = find_closest_not_painted_valuable_point(matrix, brush)
     else:
@@ -507,11 +435,11 @@ def generate_commands(brush: Brush, matrix: Matrix, debug: bool) -> None:
         brush.move_to(opposite_corner)
         brush.stop_painting()
         closest_point = find_closest_not_painted_valuable_point(matrix, brush)
-        if debug:
+        if verbose:
             render_state_in_cli(matrix, brush)
 
     brush.move_to(matrix.entrance_point)
-    if debug:
+    if verbose:
         render_state_in_cli(matrix, brush)
 
 
@@ -571,12 +499,11 @@ def render_state_in_cli(matrix: Matrix, brush: Brush) -> None:
 
 if __name__ == "__main__":
     image_file = Path(sys.argv[1])
-    try:
-        debug = sys.argv[2] == "debug"
-    except IndexError:
-        debug = False
+    if '-v' in sys.argv:
+        verbose = True
+    else:
+        verbose = False
     matrix = Matrix.from_image(image_file)
     brush = Brush(matrix.entrance_point)
-    generate_commands(brush, matrix, debug)
-    if not debug:
-        render_macros(brush.commands, image_file, True)
+    generate_commands(brush, matrix, verbose)
+    render_macros(brush.commands, image_file, True)
