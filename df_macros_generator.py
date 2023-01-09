@@ -71,10 +71,12 @@ class Matrix:
             matrix.append(row)
         matrix = cls.find_valuable_rectangle(matrix)
 
-        return cls(matrix, Point(*cls.find_red_pixel(matrix)))
+        center_coordinates = cls.find_red_pixel(matrix) or cls.find_center(matrix)
+
+        return cls(matrix, Point(*center_coordinates))
 
     @staticmethod
-    def find_red_pixel(matrix):
+    def find_red_pixel(matrix) -> Optional[tuple[int, int]]:
         for y in range(len(matrix)):
             for x in range(len(matrix[y])):
                 if matrix[y][x] == 2:
@@ -82,45 +84,56 @@ class Matrix:
         return None
 
     @staticmethod
+    def find_center(matrix) -> tuple[int, int]:
+        width = len(matrix[0])
+        height = len(matrix)
+        return (width // 2, height // 2)
+
+    @staticmethod
     def find_valuable_rectangle(matrix: list[list[int]]) -> list[list[int]]:
-        top_left = None
-        top_right = None
-        bottom_left = None
-        bottom_right = None
+        # extract submatrix from matrix that contains not only 0
+        # [[0, 1, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]] -> [[1, 1], [0, 1], [1, 1]]
+
+        # find first row with not only 0
+        first_row = None
         for y in range(len(matrix)):
-            for x in range(len(matrix[y])):
-                if matrix[y][x] == 1:
-                    if top_left is None:
-                        top_left = (x, y)
-                    if bottom_right is None:
-                        bottom_right = (x, y)
-                    if x < top_left[0]:
-                        top_left = (x, y)
-                    if x > bottom_right[0]:
-                        bottom_right = (x, y)
-                    if y < top_left[1]:
-                        top_left = (x, y)
-                    if y > bottom_right[1]:
-                        bottom_right = (x, y)
-        for y in range(len(matrix)):
-            for x in range(len(matrix[y])):
-                if matrix[y][x] == 1:
-                    if top_right is None:
-                        top_right = (x, y)
-                    if bottom_left is None:
-                        bottom_left = (x, y)
-                    if x > top_right[0]:
-                        top_right = (x, y)
-                    if x < bottom_left[0]:
-                        bottom_left = (x, y)
-                    if y < top_right[1]:
-                        top_right = (x, y)
-                    if y > bottom_left[1]:
-                        bottom_left = (x, y)
-        return [
-            row[top_left[0] : bottom_right[0] + 1]
-            for row in matrix[top_left[1] : bottom_right[1] + 1]
-        ]
+            if any(matrix[y]):
+                first_row = y
+                break
+        if first_row is None:
+            raise Exception("Matrix is empty")
+        # find last row with not only 0
+        last_row = None
+        for y in range(len(matrix) - 1, -1, -1):
+            if any(matrix[y]):
+                last_row = y
+                break
+        if last_row is None:
+            raise Exception("Matrix is empty")
+
+        # find first column with not only 0
+        first_column = None
+        for x in range(len(matrix[0])):
+            if any(row[x] for row in matrix):
+                first_column = x
+                break
+        if first_column is None:
+            raise Exception("Matrix is empty")
+        # find last column with not only 0
+        last_column = None
+        for x in range(len(matrix[0]) - 1, -1, -1):
+            if any(row[x] for row in matrix):
+                last_column = x
+                break
+        if last_column is None:
+            raise Exception("Matrix is empty")
+
+        return [row[first_column:last_column + 1] for row in matrix[first_row:last_row + 1]]
+
+
+
+
+
 
     def get_points_in_selection(self, selection_start: Point, selection_end: Point) -> list[Point]:
         points = []
@@ -158,35 +171,9 @@ class Brush:
     def __repr__(self):
         return f"Brush({self.x}, {self.y})"
 
+    @property
     def current_position(self) -> Point:
         return Point(self.x, self.y)
-
-    def interpret_command(self, command: Action):
-        if command == Action.MOVE_UP:
-            self.move_up()
-        elif command == Action.MOVE_DOWN:
-            self.move_down()
-        elif command == Action.MOVE_LEFT:
-            self.move_left()
-        elif command == Action.MOVE_RIGHT:
-            self.move_right()
-        elif command == Action.MOVE_UP_FAST:
-            self.move_up()
-            self.move_up()
-        elif command == Action.MOVE_DOWN_FAST:
-            self.move_down()
-            self.move_down()
-        elif command == Action.MOVE_LEFT_FAST:
-            self.move_left()
-            self.move_left()
-        elif command == Action.MOVE_RIGHT_FAST:
-            self.move_right()
-            self.move_right()
-        elif command == Action.SELECT:
-            if not self.painting:
-                self.start_painting()
-            else:
-                self.stop_painting()
 
     def move_up(self):
         self.y -= 1
@@ -249,24 +236,24 @@ class Brush:
         self.commands.append(Action.SELECT)
 
     def move_to(self, target_point: Point):
-        while self.current_position() != target_point:
-            if self.current_position().x < target_point.x:
-                if target_point.x - self.current_position().x >= 10:
+        while self.current_position != target_point:
+            if self.current_position.x < target_point.x:
+                if target_point.x - self.current_position.x >= 10:
                     self.move_right_fast()
                 else:
                     self.move_right()
-            elif self.current_position().x > target_point.x:
-                if self.current_position().x - target_point.x >= 10:
+            elif self.current_position.x > target_point.x:
+                if self.current_position.x - target_point.x >= 10:
                     self.move_left_fast()
                 else:
                     self.move_left()
-            elif self.current_position().y < target_point.y:
-                if target_point.y - self.current_position().y >= 10:
+            elif self.current_position.y < target_point.y:
+                if target_point.y - self.current_position.y >= 10:
                     self.move_down_fast()
                 else:
                     self.move_down()
-            elif self.current_position().y > target_point.y:
-                if self.current_position().y - target_point.y >= 10:
+            elif self.current_position.y > target_point.y:
+                if self.current_position.y - target_point.y >= 10:
                     self.move_up_fast()
                 else:
                     self.move_up()
@@ -281,7 +268,7 @@ def find_closest_not_painted_valuable_point(matrix: Matrix, brush: Brush) -> Opt
     for y in range(len(matrix.data)):
         for x in range(len(matrix.data[y])):
             if matrix.data[y][x] != 0 and Point(x, y) not in brush.painted:
-                distance = brush.current_position().distance_in_moves(Point(x, y))
+                distance = brush.current_position.distance_in_moves(Point(x, y))
                 if closest_distance is None or distance < closest_distance:
                     closest_distance = distance
                     closest_point = Point(x, y)
@@ -313,9 +300,7 @@ def find_biggest_paintable_rectangle(matrix: Matrix, brush: Brush) -> Point:
     ]
 
     rectangles_by_size = {
-        len(
-            set(matrix.get_points_in_selection(brush.current_position(), rec)) - brush.painted
-        ): rec
+        len(set(matrix.get_points_in_selection(brush.current_position, rec)) - brush.painted): rec
         for rec in found_rectangles
     }
     maximum_size = max(rectangles_by_size.keys())
@@ -331,18 +316,18 @@ def find_biggest_rectangle_to_paint_top_right(
     while (
         x < len(matrix.data[0]) - 1
         and matrix.data[y][x + 1] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x + 1, y)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x + 1, y)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x + 1, y))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x + 1, y))
     ):
         x += 1
 
     while (
         y > 0
         and matrix.data[y - 1][x] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x, y - 1)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x, y - 1)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x, y - 1))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x, y - 1))
     ):
         y -= 1
     return Point(x, y)
@@ -357,17 +342,17 @@ def find_biggest_rectangle_to_paint_bottom_right(
     while (
         x < len(matrix.data[0]) - 1
         and matrix.data[y][x + 1] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x + 1, y)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x + 1, y)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x + 1, y))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x + 1, y))
     ):
         x += 1
     while (
         y < len(matrix.data) - 1
         and matrix.data[y + 1][x] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x, y + 1)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x, y + 1)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x, y + 1))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x, y + 1))
     ):
         y += 1
     return Point(x, y)
@@ -382,18 +367,18 @@ def find_biggest_rectangle_to_paint_bottom_left(
     while (
         x > 0
         and matrix.data[y][x - 1] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x - 1, y)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x - 1, y)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x - 1, y))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x - 1, y))
     ):
         x -= 1
 
     while (
         y < len(matrix.data) - 1
         and matrix.data[y + 1][x] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x, y + 1)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x, y + 1)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x, y + 1))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x, y + 1))
     ):
         y += 1
     return Point(x, y)
@@ -407,27 +392,27 @@ def find_biggest_rectangle_to_paint_top_left(
     while (
         x > 0
         and matrix.data[y][x - 1] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x - 1, y)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x - 1, y)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x - 1, y))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x - 1, y))
     ):
         x -= 1
     while (
         y > 0
         and matrix.data[y - 1][x] != 0
-        and set(matrix.get_points_in_selection(brush.current_position(), Point(x, y - 1)))
+        and set(matrix.get_points_in_selection(brush.current_position, Point(x, y - 1)))
         - brush.painted
-        and 0 not in matrix.get_values_in_selection(brush.current_position(), Point(x, y - 1))
+        and 0 not in matrix.get_values_in_selection(brush.current_position, Point(x, y - 1))
     ):
         y -= 1
     return Point(x, y)
 
 
 def generate_commands(brush: Brush, matrix: Matrix, verbose: bool) -> None:
-    if brush.current_position() in brush.painted:
+    if brush.current_position in brush.painted:
         closest_point = find_closest_not_painted_valuable_point(matrix, brush)
     else:
-        closest_point = brush.current_position()
+        closest_point = brush.current_position
     while closest_point is not None:
         brush.move_to(closest_point)
         brush.start_painting()
@@ -475,7 +460,7 @@ def render_state_in_cli(matrix: Matrix, brush: Brush) -> None:
         data_to_print.append(f'{y:3}')
         # draw coordinates on the left and top sides
         for x in range(len(matrix.data[y])):
-            if Point(x, y) == brush.current_position():
+            if Point(x, y) == brush.current_position:
                 # color the current position with yellow
 
                 data_to_print.append("\033[33m■■■\033[0m")
