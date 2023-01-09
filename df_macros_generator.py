@@ -25,7 +25,7 @@ class Point:
         self.x = x
         self.y = y
 
-    def distance_in_moves(self, other: 'Point') -> int:
+    def distance_in_moves(self, other: "Point") -> int:
         return abs(self.x - other.x) + abs(self.y - other.y)
 
     def __repr__(self):
@@ -44,7 +44,7 @@ class Matrix:
         self.entrance_point = entrance_point
 
     @classmethod
-    def from_image(cls, image: Path) -> 'Matrix':
+    def from_image(cls, image: Path) -> "Matrix":
         image = Image.open(image)
         pixels = image.load()
 
@@ -91,10 +91,6 @@ class Matrix:
 
     @staticmethod
     def find_valuable_rectangle(matrix: list[list[int]]) -> list[list[int]]:
-        # extract submatrix from matrix that contains not only 0
-        # [[0, 1, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]] -> [[1, 1], [0, 1], [1, 1]]
-
-        # find first row with not only 0
         first_row = None
         for y in range(len(matrix)):
             if any(matrix[y]):
@@ -102,7 +98,6 @@ class Matrix:
                 break
         if first_row is None:
             raise Exception("Matrix is empty")
-        # find last row with not only 0
         last_row = None
         for y in range(len(matrix) - 1, -1, -1):
             if any(matrix[y]):
@@ -111,7 +106,6 @@ class Matrix:
         if last_row is None:
             raise Exception("Matrix is empty")
 
-        # find first column with not only 0
         first_column = None
         for x in range(len(matrix[0])):
             if any(row[x] for row in matrix):
@@ -119,7 +113,6 @@ class Matrix:
                 break
         if first_column is None:
             raise Exception("Matrix is empty")
-        # find last column with not only 0
         last_column = None
         for x in range(len(matrix[0]) - 1, -1, -1):
             if any(row[x] for row in matrix):
@@ -128,14 +121,13 @@ class Matrix:
         if last_column is None:
             raise Exception("Matrix is empty")
 
-        return [row[first_column:last_column + 1] for row in matrix[first_row:last_row + 1]]
+        return [
+            row[first_column : last_column + 1]  # noqa: E203
+            for row in matrix[first_row : last_row + 1]  # noqa: E203
+        ]
 
-
-
-
-
-
-    def get_points_in_selection(self, selection_start: Point, selection_end: Point) -> list[Point]:
+    @staticmethod
+    def get_points_in_selection(selection_start: Point, selection_end: Point) -> list[Point]:
         points = []
         if selection_start.x < selection_end.x:
             x_start = selection_start.x
@@ -289,9 +281,6 @@ def find_biggest_paintable_rectangle(matrix: Matrix, brush: Brush) -> Point:
     """
     finds the biggest paintable rectangle
     """
-    x = brush.x
-    y = brush.y
-
     found_rectangles = [
         find_biggest_rectangle_to_paint_bottom_left(matrix, brush),
         find_biggest_rectangle_to_paint_bottom_right(matrix, brush),
@@ -455,9 +444,9 @@ def render_macros(commands, file_name: Path, to_file=True):
 
 
 def render_state_in_cli(matrix: Matrix, brush: Brush) -> None:
-    data_to_print = ['   ' + ''.join(f'{i:3}' for i in range(len(matrix.data[0]))) + '\n']
+    data_to_print = ["   " + "".join(f"{i:3}" for i in range(len(matrix.data[0]))) + "\n"]
     for y in range(len(matrix.data)):
-        data_to_print.append(f'{y:3}')
+        data_to_print.append(f"{y:3}")
         # draw coordinates on the left and top sides
         for x in range(len(matrix.data[y])):
             if Point(x, y) == brush.current_position:
@@ -484,7 +473,7 @@ def render_state_in_cli(matrix: Matrix, brush: Brush) -> None:
 
 if __name__ == "__main__":
     image_file = Path(sys.argv[1])
-    if '-v' in sys.argv:
+    if "-v" in sys.argv:
         verbose = True
     else:
         verbose = False

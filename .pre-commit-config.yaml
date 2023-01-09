@@ -4,11 +4,11 @@ repos:
     hooks:
       - id: black
         alias: black-check
-        args: [--check --config pyproject.toml]
+        args: [--config=pyproject.toml --check]
         stages: [push]
       - id: black
         alias: black-format
-        args: [--config pyproject.toml]
+        args: [--config=pyproject.toml]
         stages: [commit]
 
   - repo: https://github.com/PyCQA/isort
