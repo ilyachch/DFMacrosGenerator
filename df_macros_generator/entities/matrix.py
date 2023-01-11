@@ -14,7 +14,7 @@ class Pixel(enum.Enum):
     EXIT = enum.auto()
 
     @classmethod
-    def from_color(cls, color: tuple[int, int, int]) -> 'Pixel':
+    def from_color(cls, color: tuple[int, int, int]) -> "Pixel":
         if color == (0, 0, 0):  # black
             return cls.IGNORE
         elif color == (255, 255, 255):  # white
@@ -38,7 +38,7 @@ class Matrix:
         self.exit_point = self.find_pixel_by_type(Pixel.EXIT) or center
 
     @classmethod
-    def from_image(cls, image: Path) -> 'Matrix':
+    def from_image(cls, image: Path) -> "Matrix":
         image = Image.open(image)
         pixels = image.load()
 

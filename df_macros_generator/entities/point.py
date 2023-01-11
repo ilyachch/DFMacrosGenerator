@@ -3,7 +3,7 @@ class Point:
         self.x = x
         self.y = y
 
-    def distance_in_moves(self, other: 'Point') -> int:
+    def distance_in_moves(self, other: "Point") -> int:
         return abs(self.x - other.x) + abs(self.y - other.y)
 
     def __repr__(self):

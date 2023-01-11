@@ -141,8 +141,6 @@ class Brush:
         closest_point = self.find_closest_not_painted_valuable_point()
         return bool(closest_point)
 
-
-
     def find_closest_not_painted_valuable_point(self) -> Optional[Point]:
         """
         finds the closest point that is valuable and not painted
@@ -163,7 +161,9 @@ class Brush:
         finds the biggest paintable rectangle
         """
         found_rectangles = [
-            self.find_biggest_rectangle_to_paint_for_direction(start_point, direction_x, direction_y)
+            self.find_biggest_rectangle_to_paint_for_direction(
+                start_point, direction_x, direction_y
+            )
             for direction_x in DirectionX
             for direction_y in DirectionY
         ]

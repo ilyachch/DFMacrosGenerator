@@ -72,9 +72,9 @@ class DwarfFortressMacrosGenerator:
         return "".join(lines)
 
     def render_state_in_cli(self, matrix: Matrix, brush: Brush) -> None:
-        data_to_print = ['   ' + ''.join(f'{i:3}' for i in range(len(matrix.data[0]))) + '\n']
+        data_to_print = ["   " + "".join(f"{i:3}" for i in range(len(matrix.data[0]))) + "\n"]
         for y in range(len(matrix.data)):
-            data_to_print.append(f'{y:3}')
+            data_to_print.append(f"{y:3}")
             # draw coordinates on the left and top sides
             for x in range(len(matrix.data[y])):
                 if Point(x, y) == brush.current_position:

@@ -8,23 +8,23 @@ from settings import settings
 
 @click.command()
 @click.argument(
-    'files',
+    "files",
     type=click.Path(exists=True, path_type=Path),
     required=True,
     nargs=-1,
 )
 @click.option(
-    '-o',
-    '--output',
+    "-o",
+    "--output",
     type=click.Path(exists=True, path_type=Path),
 )
 @click.option(
-    '-v',
-    '--verbose',
+    "-v",
+    "--verbose",
     count=True,
 )
 @click.option(
-    '--visualize',
+    "--visualize",
     is_flag=True,
 )
 @click.pass_context

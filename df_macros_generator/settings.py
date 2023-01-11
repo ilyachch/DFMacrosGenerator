@@ -10,14 +10,14 @@ from click.core import ParameterSource
 class Settings:
     _instance = None
 
-    _CONFIG_FILE = Path(click.get_app_dir('df_macros_generator')) / 'config.json'
+    _CONFIG_FILE = Path(click.get_app_dir("df_macros_generator")) / "config.json"
     _CONFIG_PARAMS = {
-        'OUTPUT': 'output',
-        'VERBOSITY': 'verbose',
-        'VISUALIZATION': 'visualize',
+        "OUTPUT": "output",
+        "VERBOSITY": "verbose",
+        "VISUALIZATION": "visualize",
     }
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> 'Settings':
+    def __new__(cls, *args: Any, **kwargs: Any) -> "Settings":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
@@ -41,9 +41,8 @@ class Settings:
             if ctx.get_parameter_source(param) != ParameterSource.DEFAULT:
                 self.set_option(param, ctx.params[param])
 
-
     def set_option(self, option_name: str, value: Any) -> None:
-        setattr(self, f'_{option_name}', value)
+        setattr(self, f"_{option_name}", value)
 
     @property
     def files(self) -> list[Path]:
