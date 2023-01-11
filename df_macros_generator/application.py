@@ -4,8 +4,7 @@ import time
 from pathlib import Path
 
 import click
-
-from entities.brush import Brush, Action
+from entities.brush import Action, Brush
 from entities.matrix import Matrix, Pixel
 from entities.point import Point
 from settings import Settings
@@ -42,7 +41,7 @@ class DwarfFortressMacrosGenerator:
         brush = Brush(matrix)
 
         while True:
-            more_moves = brush.paint()
+            more_moves = brush.tick()
             if not more_moves:
                 break
             if self._settings.visualize:

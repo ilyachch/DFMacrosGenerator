@@ -1,10 +1,9 @@
+import enum
 from pathlib import Path
 from typing import Optional
 
-from PIL import Image
-
 from entities.point import Point
-import enum
+from PIL import Image
 
 
 class Pixel(enum.Enum):
@@ -37,6 +36,9 @@ class Matrix:
         self.entrance_point = self.find_pixel_by_type(Pixel.ENTER) or center
         self.exit_point = self.find_pixel_by_type(Pixel.EXIT) or center
 
+        self.__iter_x = None
+        self.__iter_y = None
+
     @classmethod
     def from_image(cls, image: Path) -> "Matrix":
         image = Image.open(image)
@@ -55,6 +57,25 @@ class Matrix:
         field: list[list[Pixel]] = cls.find_valuable_rectangle(matrix)
 
         return cls(field)
+
+    def __iter__(self) -> "Matrix":
+        self.__iter_x = 0
+        self.__iter_y = 0
+        return self
+
+    def __next__(self) -> tuple[Point, Pixel]:
+        if self.__iter_y >= len(self.data):
+            raise StopIteration
+
+        row = self.data[self.__iter_y]
+        if self.__iter_x >= len(row):
+            self.__iter_x = 0
+            self.__iter_y += 1
+            return self.__next__()
+        else:
+            pixel = row[self.__iter_x]
+            self.__iter_x += 1
+            return Point(self.__iter_x - 1, self.__iter_y), pixel
 
     def find_pixel_by_type(self, point_type: Pixel) -> Optional[Point]:
         for y, row in enumerate(self.data):

@@ -1,8 +1,8 @@
 import enum
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
-from entities.point import Point
 from entities.matrix import Matrix, Pixel
+from entities.point import Point
 
 
 class Action(enum.Enum):
@@ -127,7 +127,7 @@ class Brush:
                 else:
                     self.move_up()
 
-    def paint(self) -> bool:
+    def tick(self) -> bool:
         if self.current_position in self.painted:
             closest_point = self.find_closest_not_painted_valuable_point()
         else:
@@ -135,7 +135,7 @@ class Brush:
 
         self.move_to(closest_point)
         self.start_painting()
-        opposite_corner = self.find_biggest_paintable_rectangle(self.current_position)
+        opposite_corner, _ = self.find_biggest_paintable_rectangle(self.current_position)
         self.move_to(opposite_corner)
         self.stop_painting()
         closest_point = self.find_closest_not_painted_valuable_point()
@@ -156,7 +156,7 @@ class Brush:
                         closest_point = Point(x, y)
         return closest_point
 
-    def find_biggest_paintable_rectangle(self, start_point: Point) -> Point:
+    def find_biggest_paintable_rectangle(self, start_point: Point) -> tuple[Point, int]:
         """
         finds the biggest paintable rectangle
         """
@@ -176,7 +176,7 @@ class Brush:
         }
         maximum_size = max(rectangles_by_size.keys())
 
-        return rectangles_by_size[maximum_size]
+        return rectangles_by_size[maximum_size], maximum_size
 
     def find_biggest_rectangle_to_paint_for_direction(
         self, start_point: Point, direction_x: DirectionX, direction_y: DirectionY
