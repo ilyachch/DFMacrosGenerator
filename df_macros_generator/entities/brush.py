@@ -1,5 +1,5 @@
 import enum
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from entities.matrix import Matrix, Pixel
 from entities.point import Point
