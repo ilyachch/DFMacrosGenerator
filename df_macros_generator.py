@@ -46,27 +46,25 @@ class Matrix:
     @classmethod
     def from_image(cls, image: Path) -> 'Matrix':
         image = Image.open(image)
-        pixels = image.load()
-
+        pixels = image.convert('RGB')
         width, height = image.size
 
         matrix = []
         for y in range(height):
             row = []
             for x in range(width):
-                pixel = pixels[x, y]
-                pixel = pixel[:3]
-                if pixel == (255, 255, 255):
+                r, g, b = pixels.getpixel((x, y))
+                if (r, g, b) == (255, 255, 255):
                     # White pixel
                     value = 1
-                elif pixel == (0, 0, 0):
+                elif (r, g, b) == (0, 0, 0):
                     # Black pixel
                     value = 0
-                elif pixel == (255, 0, 0):
+                elif (r, g, b) == (255, 0, 0):
                     # Red pixel
                     value = 2
                 else:
-                    raise Exception("Invalid pixel color", pixel)
+                    raise Exception("Invalid pixel color", (r, g, b))
                 row.append(value)
             matrix.append(row)
         matrix = cls.find_valuable_rectangle(matrix)
