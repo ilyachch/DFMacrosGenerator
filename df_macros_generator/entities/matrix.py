@@ -41,10 +41,10 @@ class Matrix:
 
     @classmethod
     def from_image(cls, image: Path) -> "Matrix":
-        image = Image.open(image)
-        pixels = image.load()
+        image_obj = Image.open(image)
+        pixels = image_obj.load()
 
-        width, height = image.size
+        width, height = image_obj.size
 
         matrix = []
         for y in range(height):
@@ -52,7 +52,10 @@ class Matrix:
             for x in range(width):
                 pixel = pixels[x, y]
                 pixel = pixel[:3]
-                row.append(Pixel.from_color(pixel))
+                try:
+                    row.append(Pixel.from_color(pixel))
+                except ValueError:
+                    raise ValueError(f"Unknown color at ({x}, {y}): {pixel} in {image.name}")
             matrix.append(row)
         field: list[list[Pixel]] = cls.find_valuable_rectangle(matrix)
 

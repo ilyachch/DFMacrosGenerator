@@ -24,7 +24,7 @@ class DwarfFortressMacrosGenerator:
 
     def get_macros_file(self, file: Path) -> Path:
         folder = self._settings.output
-        file = file.with_suffix(".mak")
+        file = Path(file.with_suffix(".mak").name)
         return folder / file
 
     def _set_logging_level(self) -> None:
