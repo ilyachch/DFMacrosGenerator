@@ -1,11 +1,30 @@
 [tool.poetry]
 name = "df-macros-generator"
-version = "0.1.0"
+version = "1.0.0"
 description = "Generates macros by image"
 authors = ["Ilya Chichak <ilyachch@gmail.com>"]
-license = "MIT"
+license = "MIT License"
 readme = "README.md"
 packages = [{include = "df_macros_generator"}]
+repository = "https://github.com/ilyachch/DFMacrosGenerator"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Documentation",
+    "Topic :: Utilities",
+    "Typing :: Typed"
+]
+
+[tool.poetry.scripts]
+df-macros-generator = "df_macros_generator.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -39,7 +58,9 @@ use_parentheses = true
 [tool.mypy]
 python_version = 3.10
 disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_configs = true
 
 [tool.flake8]
 max-line-length = 99
-max-complexity = 10
+max-complexity = 6

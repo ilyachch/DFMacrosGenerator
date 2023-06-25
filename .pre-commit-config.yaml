@@ -5,7 +5,7 @@ repos:
       - id: black
         alias: black-check
         args: [--check --config=pyproject.toml]
-        stages: [push]
+        stages: [push, manual]
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.12.0
@@ -13,7 +13,7 @@ repos:
       - id: isort
         alias: isort-check
         args: [--check-only --settings-file pyproject.toml]
-        stages: [push]
+        stages: [push, manual]
 
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
@@ -21,13 +21,13 @@ repos:
       - id: flake8
         additional_dependencies:
           - Flake8-pyproject
-        stages: [push]
+        stages: [push, manual]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
+    rev: v1.4.0
     hooks:
       - id: mypy
-        stages: [push]
+        stages: [push, manual]
 
 
 

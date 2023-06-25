@@ -13,7 +13,6 @@ class Settings:
     _CONFIG_FILE = Path(click.get_app_dir("df_macros_generator")) / "config.json"
     _CONFIG_PARAMS = {
         "OUTPUT": "output",
-        "VERBOSITY": "verbose",
         "VISUALIZATION": "visualize",
     }
 
