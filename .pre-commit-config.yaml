@@ -1,33 +1,39 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
+  - repo: local
+
     hooks:
-      - id: black
-        alias: black-check
-        args: [--check --config=pyproject.toml]
+      - id: check-black
+        name: check black
+        language: python
+        types: [python]
+        files: ^df_macros_generator\/.*\.py$
+        require_serial: true
+        entry: poetry run black --config pyproject.toml --check df_macros_generator
         stages: [push, manual]
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        alias: isort-check
-        args: [--check-only --settings-file pyproject.toml]
+      - id: check-isort
+        name: check isort
+        language: python
+        types: [python]
+        files: ^df_macros_generator\/.*\.py$
+        require_serial: true
+        entry: poetry run isort --check-only
         stages: [push, manual]
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - Flake8-pyproject
+      - id: check-mypy
+        name: check mypy
+        language: python
+        types: [python]
+        files: ^df_macros_generator\/.*\.py$
+        require_serial: true
+        entry: poetry run mypy --config-file pyproject.toml
         stages: [push, manual]
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.4.0
-    hooks:
-      - id: mypy
+      - id: check-flake8
+        name: check flake8
+        language: python
+        types: [python]
+        files: ^df_macros_generator\/.*\.py$
+        require_serial: true
+        entry: poetry run flake8
         stages: [push, manual]
-
-
-

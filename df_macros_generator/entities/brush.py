@@ -30,60 +30,60 @@ class DirectionY(enum.Enum):
 class Brush:
     def __init__(self, matrix: Matrix):
         self.matrix = matrix
-        self.x = self.matrix.entrance_point.x
-        self.y = self.matrix.entrance_point.y
+        self.x: int = self.matrix.entrance_point.x
+        self.y: int = self.matrix.entrance_point.y
         self.painting = False
-        self.painted = set()
-        self.painting_start = None
-        self.commands = []
+        self.painted: set[Point] = set()
+        self.painting_start: tuple[int, int] = (self.x, self.y)
+        self.commands: list[Action] = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Brush({self.x}, {self.y})"
 
     @property
     def current_position(self) -> Point:
         return Point(self.x, self.y)
 
-    def move_up(self):
+    def move_up(self) -> None:
         self.y -= 1
         self.commands.append(Action.MOVE_UP)
 
-    def move_down(self):
+    def move_down(self) -> None:
         self.y += 1
         self.commands.append(Action.MOVE_DOWN)
 
-    def move_left(self):
+    def move_left(self) -> None:
         self.x -= 1
         self.commands.append(Action.MOVE_LEFT)
 
-    def move_right(self):
+    def move_right(self) -> None:
         self.x += 1
         self.commands.append(Action.MOVE_RIGHT)
 
-    def move_up_fast(self):
+    def move_up_fast(self) -> None:
         self.y -= 10
         self.commands.append(Action.MOVE_UP_FAST)
 
-    def move_down_fast(self):
+    def move_down_fast(self) -> None:
         self.y += 10
         self.commands.append(Action.MOVE_DOWN_FAST)
 
-    def move_left_fast(self):
+    def move_left_fast(self) -> None:
         self.x -= 10
         self.commands.append(Action.MOVE_LEFT_FAST)
 
-    def move_right_fast(self):
+    def move_right_fast(self) -> None:
         self.x += 10
         self.commands.append(Action.MOVE_RIGHT_FAST)
 
-    def start_painting(self):
+    def start_painting(self) -> None:
         if self.painting:
             raise Exception("Already painting")
         self.painting = True
         self.painting_start = (self.x, self.y)
         self.commands.append(Action.SELECT)
 
-    def stop_painting(self):
+    def stop_painting(self) -> None:
         if not self.painting:
             raise Exception("Not painting")
         self.painting = False
@@ -104,7 +104,7 @@ class Brush:
         self.painted.update(painted_area_coordinates)
         self.commands.append(Action.SELECT)
 
-    def move_to(self, target_point: Point):
+    def move_to(self, target_point: Point) -> None:
         while self.current_position != target_point:
             if self.current_position.x < target_point.x:
                 if target_point.x - self.current_position.x >= 10:
@@ -183,50 +183,84 @@ class Brush:
     ) -> Point:
         x, y = start_point.x, start_point.y
         if direction_x == DirectionX.LEFT:
-            validation_x = lambda: (
-                x > 0
-                and self.matrix.data[y][x - 1] != Pixel.IGNORE
-                and set(
-                    self.matrix.get_points_in_selection(self.current_position, Point(x - 1, y))
+
+            def validation_x() -> bool:
+                return (
+                    x > 0
+                    and self.matrix.data[y][x - 1] != Pixel.IGNORE
+                    and bool(
+                        set(
+                            self.matrix.get_points_in_selection(
+                                self.current_position, Point(x - 1, y)
+                            )
+                        )
+                        - self.painted
+                    )
+                    and Pixel.IGNORE
+                    not in self.matrix.get_values_in_selection(
+                        self.current_position, Point(x - 1, y)
+                    )
                 )
-                - self.painted
-                and Pixel.IGNORE
-                not in self.matrix.get_values_in_selection(self.current_position, Point(x - 1, y))
-            )
+
         else:
-            validation_x = lambda: (
-                x < len(self.matrix.data[0]) - 1
-                and self.matrix.data[y][x + 1] != Pixel.IGNORE
-                and set(
-                    self.matrix.get_points_in_selection(self.current_position, Point(x + 1, y))
+
+            def validation_x() -> bool:
+                return (
+                    x < len(self.matrix.data[0]) - 1
+                    and self.matrix.data[y][x + 1] != Pixel.IGNORE
+                    and bool(
+                        set(
+                            self.matrix.get_points_in_selection(
+                                self.current_position, Point(x + 1, y)
+                            )
+                        )
+                        - self.painted
+                    )
+                    and Pixel.IGNORE
+                    not in self.matrix.get_values_in_selection(
+                        self.current_position, Point(x + 1, y)
+                    )
                 )
-                - self.painted
-                and Pixel.IGNORE
-                not in self.matrix.get_values_in_selection(self.current_position, Point(x + 1, y))
-            )
 
         if direction_y == DirectionY.TOP:
-            validation_y = lambda: (
-                y > 0
-                and self.matrix.data[y - 1][x] != Pixel.IGNORE
-                and set(
-                    self.matrix.get_points_in_selection(self.current_position, Point(x, y - 1))
+
+            def validation_y() -> bool:
+                return (
+                    y > 0
+                    and self.matrix.data[y - 1][x] != Pixel.IGNORE
+                    and bool(
+                        set(
+                            self.matrix.get_points_in_selection(
+                                self.current_position, Point(x, y - 1)
+                            )
+                        )
+                        - self.painted
+                    )
+                    and Pixel.IGNORE
+                    not in self.matrix.get_values_in_selection(
+                        self.current_position, Point(x, y - 1)
+                    )
                 )
-                - self.painted
-                and Pixel.IGNORE
-                not in self.matrix.get_values_in_selection(self.current_position, Point(x, y - 1))
-            )
+
         else:
-            validation_y = lambda: (
-                y < len(self.matrix.data) - 1
-                and self.matrix.data[y + 1][x] != Pixel.IGNORE
-                and set(
-                    self.matrix.get_points_in_selection(self.current_position, Point(x, y + 1))
+
+            def validation_y() -> bool:
+                return (
+                    y < len(self.matrix.data) - 1
+                    and self.matrix.data[y + 1][x] != Pixel.IGNORE
+                    and bool(
+                        set(
+                            self.matrix.get_points_in_selection(
+                                self.current_position, Point(x, y + 1)
+                            )
+                        )
+                        - self.painted
+                    )
+                    and Pixel.IGNORE
+                    not in self.matrix.get_values_in_selection(
+                        self.current_position, Point(x, y + 1)
+                    )
                 )
-                - self.painted
-                and Pixel.IGNORE
-                not in self.matrix.get_values_in_selection(self.current_position, Point(x, y + 1))
-            )
 
         while validation_x():
             if direction_x == DirectionX.LEFT:

@@ -28,7 +28,7 @@ class Settings:
         self._visualize: bool = False
         self.__update_with_config()
 
-    def __update_with_config(self):
+    def __update_with_config(self) -> None:
         if self._CONFIG_FILE.exists():
             config = json.loads(self._CONFIG_FILE.read_text())
             for config_option, settings_option in self._CONFIG_PARAMS.items():

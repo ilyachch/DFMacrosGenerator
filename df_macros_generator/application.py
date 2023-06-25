@@ -14,7 +14,7 @@ class DwarfFortressMacrosGenerator:
         self._settings = settings
         self._logger = logging.getLogger(__name__)
 
-    def run(self):
+    def run(self) -> None:
         self._set_logging_level()
         for file in self._settings.files:
             commands = self.generate_commands(file)

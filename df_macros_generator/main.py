@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import click
 from application import DwarfFortressMacrosGenerator
@@ -27,7 +28,7 @@ from settings import settings
     is_flag=True,
 )
 @click.pass_context
-def main(ctx, **kwargs):
+def main(ctx: Any, **kwargs: Any) -> None:
     settings.patch_with_params(ctx)
     exit_code = DwarfFortressMacrosGenerator(settings).run()
 

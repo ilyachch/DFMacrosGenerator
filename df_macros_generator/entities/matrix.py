@@ -25,7 +25,7 @@ class Pixel(enum.Enum):
         else:
             raise ValueError(f"Unknown color: {color}")
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self != self.IGNORE
 
 
@@ -35,9 +35,6 @@ class Matrix:
         center = Point(len(data[0]) // 2, len(data) // 2)
         self.entrance_point = self.find_pixel_by_type(Pixel.ENTER) or center
         self.exit_point = self.find_pixel_by_type(Pixel.EXIT) or center
-
-        self.__iter_x = None
-        self.__iter_y = None
 
     @classmethod
     def from_image(cls, image: Path) -> "Matrix":
@@ -119,7 +116,10 @@ class Matrix:
         if last_column is None:
             raise Exception("Matrix is empty")
 
-        return [row[first_column : last_column + 1] for row in matrix[first_row : last_row + 1]]
+        return [
+            row[first_column : last_column + 1]  # noqa: E203
+            for row in matrix[first_row : last_row + 1]  # noqa: E203
+        ]
 
     def get_points_in_selection(self, selection_start: Point, selection_end: Point) -> list[Point]:
         points = []
